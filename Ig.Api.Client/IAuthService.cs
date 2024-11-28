@@ -7,5 +7,6 @@ public interface IAuthService
     Task<Result> LoginAsync(string username, string password);
 
     OAuthToken? GetToken();
-    //Task<Result<OAuthToken>> GetTokenAsync(AuthenticationRequest request);
+
+    string? GetAccountId();
 }

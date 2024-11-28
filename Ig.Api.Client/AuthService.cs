@@ -7,7 +7,8 @@ public class AuthService( IIgLoginClient igLoginClient) : IAuthService
     private readonly IIgLoginClient _igLoginClient = igLoginClient ?? throw new ArgumentNullException(nameof(igLoginClient));
 
     private OAuthToken? _authToken = null;
-  
+    private string? _accountId = null;
+
 
     public async Task<Result> LoginAsync(string username, string password)
     {
@@ -21,12 +22,12 @@ public class AuthService( IIgLoginClient igLoginClient) : IAuthService
 
         if (login.IsSuccess)
         {
-            _authToken = login.Data;
             return Result.Success();
         }
         else
         {
             _authToken = null;
+            _accountId = null;
             return Result.Failure(login.ErrorCode);
         }
     }
@@ -36,25 +37,30 @@ public class AuthService( IIgLoginClient igLoginClient) : IAuthService
        return _authToken;
     }
 
-    private  async Task<Result<OAuthToken>> GetTokenAsync(AuthenticationRequest request)
+    public string? GetAccountId()
+    {
+        return _accountId;
+    }
+
+    private  async Task<Result> GetTokenAsync(AuthenticationRequest request)
     {
         var response = await _igLoginClient.LoginAsync(request);
 
         if (response.IsFailure)
         {
-            return Result<OAuthToken>.Failure(response.ErrorCode);
+            return Result.Failure(response.ErrorCode);
         }
         else
         {
-            var token = response.Data?.OauthToken;
-
-            if (token == null)
+            if (response.Data?.OauthToken is null)
             {
-                return Result<OAuthToken>.Failure("EmptyToken");
+                return Result.Failure("EmptyToken");
             }
             else
             {
-                return Result<OAuthToken>.Success(token);
+                _authToken = response.Data?.OauthToken;
+                _accountId = response.Data?.AccountId;
+                return Result.Success();
             }
         }
     }

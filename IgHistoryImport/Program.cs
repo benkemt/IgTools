@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Ig.Api.Client.Extension;
+using Ig.Api.Client.Model;
 using Microsoft.Extensions.Configuration;
 
 var services = new ServiceCollection();
@@ -17,7 +18,6 @@ services.AddSingleton<IConfiguration>(configuration);
 
 
 services.AddIgClient("https://demo-api.ig.com/", configuration["IgApiKey"] ?? "");
-
 
 
 
@@ -43,4 +43,11 @@ else
     Console.WriteLine($"Login Failed : '{res.ErrorCode}'" );
 }
 
+var from = new DateTime(2024, 11, 28, 8, 0, 0);
+var end = from.AddMinutes(2);
+var result = await igClient.GetHistoricalPricesAsync("IX.D.CAC.IDF.IP", Resolution.MINUTE, from, end);
 
+if (result.IsSuccess)
+{
+    Console.WriteLine(result.Data);
+}
