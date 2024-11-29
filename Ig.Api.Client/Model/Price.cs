@@ -2,8 +2,8 @@
 
 public class Price
 {
-    public decimal Ask { get; set; }
-    public decimal Bid { get; set; }
+    public decimal? Ask { get; set; }
+    public decimal? Bid { get; set; }
     public decimal? LastTraded { get; set; }
 }
 
@@ -11,7 +11,7 @@ public class PriceSnapshot
 {
     public Price ClosePrice { get; set; } = null!;
     public Price HighPrice { get; set; } = null!;
-    public decimal LastTradedVolume { get; set; }
+    public decimal? LastTradedVolume { get; set; }
     
     public Price LowPrice { get; set; } = null!;
     public Price OpenPrice { get; set; } = null!;

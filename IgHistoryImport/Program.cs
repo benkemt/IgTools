@@ -24,32 +24,50 @@ static async Task GetHistoricPrice(
 
     Console.WriteLine($"Login to igApi");
 
-    var historicalPrices = await igClient.GetHistoricalPricesAsync(argOption.Epic, Resolution.MINUTE, argOption.StartDate, argOption.EndDate);
+    TimeSpan span = argOption.EndDate - argOption.StartDate;
+    double dayCount = span.TotalDays +1;
 
-    if(historicalPrices.IsSuccess)
+    for(int i = 0; i < dayCount; i++)
     {
-        if (historicalPrices.Data is null)
+        var currentDate = argOption.StartDate.AddDays(i);
+
+        if (currentDate.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday)
         {
-            return;
+            Console.WriteLine($"Skip Date : {currentDate}");
+            continue;
         }
 
-        Console.WriteLine($"Historical Prices for {argOption.Epic}");
+        var startDate = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, 08, 0, 0);
+        var endDate = new DateTime(currentDate.Year, currentDate.Month, currentDate.Day, 22, 0, 0);
 
-        // Serialize the historical prices to JSON
-        var json = JsonSerializer.Serialize(historicalPrices.Data.Prices, new JsonSerializerOptions { WriteIndented = true });
+        var historicalPrices = await igClient.GetHistoricalPricesAsync(argOption.Epic, Resolution.MINUTE, startDate, endDate);
 
+        if (historicalPrices.IsSuccess)
+        {
+            if (historicalPrices.Data is null)
+            {
+                Console.WriteLine($"No data for {argOption.Epic} from {startDate} to {endDate}");
+                return;
+            }
 
-        // Write the JSON data to a file
-        var fileName = $"{argOption.StartDate:yyyy-MM-dd}.json";
-        await File.WriteAllTextAsync(fileName, json);
+            Console.WriteLine($"Historical Prices for {argOption.Epic} from {startDate} to {endDate} : {historicalPrices.Data.Prices.Count} Items");
 
-        Console.WriteLine($"Historical prices saved to {fileName}");
+            // Serialize the historical prices to JSON
+            var json = JsonSerializer.Serialize(historicalPrices.Data.Prices, new JsonSerializerOptions { WriteIndented = true });
+            // Write the JSON data to a file
+            var fileName = $"{startDate:yyyy-MM-dd}.json";
+            //create a directory if it does not exist
+            Directory.CreateDirectory("data");
+            await File.WriteAllTextAsync($"data\\{fileName}", json);
 
-        Console.WriteLine($"Allowance : '{historicalPrices.Data.MetaData.Allowance.RemainingAllowance}'");
-    }
-    else
-    {
-        Console.WriteLine($"Failed to get Historical Prices for {argOption.Epic} : '{historicalPrices.ErrorCode}'");
+            Console.WriteLine($"Historical prices saved to {fileName}");
+
+            Console.WriteLine($"Allowance : '{historicalPrices.Data.MetaData.Allowance.RemainingAllowance}'");
+        }
+        else
+        {
+            Console.WriteLine($"Failed to get Historical Prices for {argOption.Epic} : '{historicalPrices.ErrorCode}'");
+        }
     }
 }
 

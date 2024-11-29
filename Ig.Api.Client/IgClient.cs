@@ -13,6 +13,7 @@ public class IgClient(HttpClient httpClient) : IIgClient
         query["resolution"] = Enum.GetName(resolution);
         query["from"] = startDate.ToString("yyyy-MM-ddTHH:mm:ss");
         query["to"] = endDate.ToString("yyyy-MM-ddTHH:mm:ss");
+        query["pageSize"] = "840";
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"gateway/deal/prices/{epic}?{query}");
         requestMessage.Headers.Add("Version", "3");

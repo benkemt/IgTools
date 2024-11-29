@@ -2,7 +2,7 @@
   "profiles": {
     "IgHistoryImport": {
       "commandName": "Project",
-      "commandLineArgs": "--epic IX.D.CAC.IDF.IP --startDate 2024-11-25T09:00:00 --endDate 2024-11-25T09:03:00"
+      "commandLineArgs": "--epic IX.D.CAC.IDF.IP --startDate 2024-11-25 --endDate 2024-11-25"
     }
   }
 }
