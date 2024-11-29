@@ -1,6 +1,7 @@
 ﻿using Ig.Api.Client.Helpers;
 using Ig.Api.Client.Model;
 using System.Text.Json;
+using System.Web;
 
 namespace Ig.Api.Client;
 
@@ -8,12 +9,13 @@ public class IgClient(HttpClient httpClient) : IIgClient
 {
     public async Task<Result<PriceList>> GetHistoricalPricesAsync(string epic, Resolution resolution, DateTime startDate, DateTime endDate)
     {
-        var startDateString = startDate.ToString("yyyy-MM-dd HH:mm:ss");
-        var enDateString = endDate.ToString("yyyy-MM-dd HH:mm:ss");
-        var resolutionString = Enum.GetName(resolution);
-        
-        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"gateway/deal/prices/{epic}/{resolutionString}/{startDateString}/{enDateString}");
-        requestMessage.Headers.Add("Version", "2");
+        var query = HttpUtility.ParseQueryString(string.Empty);
+        query["resolution"] = Enum.GetName(resolution);
+        query["from"] = startDate.ToString("yyyy-MM-ddTHH:mm:ss");
+        query["to"] = endDate.ToString("yyyy-MM-ddTHH:mm:ss");
+
+        var requestMessage = new HttpRequestMessage(HttpMethod.Get, $"gateway/deal/prices/{epic}?{query}");
+        requestMessage.Headers.Add("Version", "3");
 
         try
         {

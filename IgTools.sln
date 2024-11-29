@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35013.160
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IgHistoryImport", "IgHistoryImport\IgHistoryImport.csproj", "{457EC0AA-E715-4B24-BBD6-492202B6E009}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IgHistoryImport", "IgHistoryImport\IgHistoryImport.csproj", "{457EC0AA-E715-4B24-BBD6-492202B6E009}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ig.Api.Client", "Ig.Api.Client\Ig.Api.Client.csproj", "{23ED4749-F9DE-4F09-AE9B-48CB649ABA2C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ig.Api.Client", "Ig.Api.Client\Ig.Api.Client.csproj", "{23ED4749-F9DE-4F09-AE9B-48CB649ABA2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

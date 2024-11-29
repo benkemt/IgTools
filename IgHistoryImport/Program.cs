@@ -1,53 +1,63 @@
 ﻿using Ig.Api.Client;
-
-using Microsoft.Extensions.DependencyInjection;
-using Ig.Api.Client.Extension;
 using Ig.Api.Client.Model;
+using IgHistoryImport;
 using Microsoft.Extensions.Configuration;
+using System.Text.Json;
 
-var services = new ServiceCollection();
+await IgHistoryImportBuilder.Create()
+    .ExecuteAsync(args, GetHistoricPrice, Errors);
+return 0;
 
-var configurationBuilder = new ConfigurationBuilder()
-    .SetBasePath(Directory.GetCurrentDirectory())
-    //.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-    .AddUserSecrets<Program>()
-    .AddEnvironmentVariables();
-
-IConfiguration configuration = configurationBuilder.Build();
-services.AddSingleton<IConfiguration>(configuration);
-
-
-services.AddIgClient("https://demo-api.ig.com/", configuration["IgApiKey"] ?? "");
-
-
-
-var serviceProvider = services.BuildServiceProvider();
-
-var igClient = IgClientFactory.CreateIgClient(serviceProvider);
-var authService  =IgClientFactory.CreateAuthService(serviceProvider);
-
-
-
-var config = serviceProvider.GetRequiredService<IConfiguration>();
-
-
-
-var res = await authService.LoginAsync(config["IgUserName"] ?? "", config["IgPassword"] ?? "");
-
-if(res.IsSuccess)
+static async Task GetHistoricPrice(
+    ArgOption argOption, 
+    IConfiguration configuration, 
+    IIgClient igClient, 
+    IAuthService authService)
 {
-    Console.WriteLine("Login Success");
+    var res = await authService.LoginAsync(configuration["IgUserName"] ?? "", configuration["IgPassword"] ?? "");
+
+    if (!res.IsSuccess)
+    {
+        Console.WriteLine($"Login Failed : '{res.ErrorCode}'");
+        return;
+    }
+
+    Console.WriteLine($"Login to igApi");
+
+    var historicalPrices = await igClient.GetHistoricalPricesAsync(argOption.Epic, Resolution.MINUTE, argOption.StartDate, argOption.EndDate);
+
+    if(historicalPrices.IsSuccess)
+    {
+        if (historicalPrices.Data is null)
+        {
+            return;
+        }
+
+        Console.WriteLine($"Historical Prices for {argOption.Epic}");
+
+        // Serialize the historical prices to JSON
+        var json = JsonSerializer.Serialize(historicalPrices.Data.Prices, new JsonSerializerOptions { WriteIndented = true });
+
+
+        // Write the JSON data to a file
+        var fileName = $"{argOption.StartDate:yyyy-MM-dd}.json";
+        await File.WriteAllTextAsync(fileName, json);
+
+        Console.WriteLine($"Historical prices saved to {fileName}");
+
+        Console.WriteLine($"Allowance : '{historicalPrices.Data.MetaData.Allowance.RemainingAllowance}'");
+    }
+    else
+    {
+        Console.WriteLine($"Failed to get Historical Prices for {argOption.Epic} : '{historicalPrices.ErrorCode}'");
+    }
 }
-else
-{
-    Console.WriteLine($"Login Failed : '{res.ErrorCode}'" );
-}
 
-var from = new DateTime(2024, 11, 28, 8, 0, 0);
-var end = from.AddMinutes(2);
-var result = await igClient.GetHistoricalPricesAsync("IX.D.CAC.IDF.IP", Resolution.MINUTE, from, end);
 
-if (result.IsSuccess)
+static void Errors(IEnumerable<CommandLine.Error> errors)
 {
-    Console.WriteLine(result.Data);
+    foreach (var error in errors)
+    {
+        Console.WriteLine(error.ToString());
+    }
 }
