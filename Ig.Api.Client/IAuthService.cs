@@ -9,4 +9,8 @@ public interface IAuthService
     OAuthToken? GetToken();
 
     string? GetAccountId();
+
+    string? GetCstToken();
+    string? GetSecurityToken();
+    string? GetLightStreamServerAddress();
 }

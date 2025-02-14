@@ -1,4 +1,5 @@
-﻿using Ig.Api.Client;
+﻿using com.lightstreamer.client;
+using Ig.Api.Client;
 using Ig.Api.Client.Extension;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,18 +36,22 @@ public class IgHistoryImportBuilder
     }
 
     public async Task ExecuteAsync( string[] args, 
-        Func<ArgOption, IConfiguration , IIgClient, IAuthService,Task> actionParsed,  Action<IEnumerable<Error>> actionNotParsed)
+        Func<ArgOption, IConfiguration , IIgClient, IAuthService, IIgStreamClient, Task> actionParsed,  Action<IEnumerable<Error>> actionNotParsed)
     {
         if (_serviceProvider is null) throw new ArgumentNullException(nameof(_serviceProvider));
 
         var igClient = IgClientFactory.CreateIgClient(_serviceProvider);
         var authService = IgClientFactory.CreateAuthService(_serviceProvider);
 
+
+        var igStreamClient = IgClientFactory.CreateIgStreamClient(_serviceProvider);
+        
+
         // Parse command-line arguments
         var res = await Parser.Default.ParseArguments<ArgOption>(args)
             .WithParsedAsync(async options =>
             {
-                await actionParsed(options, _configuration, igClient, authService);
+                await actionParsed(options, _configuration, igClient, authService, igStreamClient);
             });
 
         res.WithNotParsed(actionNotParsed);

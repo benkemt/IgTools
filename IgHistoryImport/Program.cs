@@ -1,4 +1,5 @@
-﻿using Ig.Api.Client;
+﻿using com.lightstreamer.client;
+using Ig.Api.Client;
 using Ig.Api.Client.Model;
 using IgHistoryImport;
 using Microsoft.Extensions.Configuration;
@@ -8,11 +9,16 @@ await IgHistoryImportBuilder.Create()
     .ExecuteAsync(args, GetHistoricPrice, Errors);
 return 0;
 
+
+
+
+
 static async Task GetHistoricPrice(
     ArgOption argOption, 
     IConfiguration configuration, 
     IIgClient igClient, 
-    IAuthService authService)
+    IAuthService authService,
+    IIgStreamClient streamClient)
 {
     var res = await authService.LoginAsync(configuration["IgUserName"] ?? "", configuration["IgPassword"] ?? "");
 
@@ -23,6 +29,15 @@ static async Task GetHistoricPrice(
     }
 
     Console.WriteLine($"Login to igApi");
+
+
+    var clientListener = new StreamClientListener();
+
+    streamClient.LoginAsync(clientListener);
+
+    Console.ReadLine();
+
+    return;
 
     TimeSpan span = argOption.EndDate - argOption.StartDate;
     double dayCount = span.TotalDays +1;
@@ -79,3 +94,5 @@ static void Errors(IEnumerable<CommandLine.Error> errors)
         Console.WriteLine(error.ToString());
     }
 }
+
+//.\IgHistoryImport.exe --epic IX.D.CAC.IDF.IP --startDate 2024-11-25 --endDate 2024-11-27

@@ -15,4 +15,10 @@ public static class IgClientFactory
         if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
         return serviceProvider.GetRequiredService<IAuthService>();
     }
+
+    public static IIgStreamClient CreateIgStreamClient(IServiceProvider serviceProvider)
+    {
+        if (serviceProvider == null) throw new ArgumentNullException(nameof(serviceProvider));
+        return serviceProvider.GetRequiredService<IIgStreamClient>();
+    }
 }

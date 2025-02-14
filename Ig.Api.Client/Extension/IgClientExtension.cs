@@ -12,6 +12,8 @@ public static class IgClientExtension
         serviceCollection.AddSingleton<IAuthService, AuthService>();
         serviceCollection.AddTransient<AuthTokenHandler>();
 
+        serviceCollection.AddScoped<IIgStreamClient, IgStreamClient>();
+
         serviceCollection.AddHttpClient<IIgClient, IgClient> ((client) =>
         {
             client.DefaultRequestHeaders.Add("X-IG-API-KEY", apiKeyValue);
